@@ -90,7 +90,6 @@ public class PegasusPlayerG3 : PegasusG3
 
         rb.angularVelocity = RotationAmount * CurrentRotSpeed;
 
-        //rb.velocity = transform.up * CurrentSpeed;
         FlyForward();
     }
 
