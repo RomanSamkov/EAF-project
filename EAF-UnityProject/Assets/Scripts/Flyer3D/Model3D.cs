@@ -10,7 +10,7 @@ public class Model3D : MonoBehaviour
     protected Animator anim;
     public TestPlayer3D flyer;
 
-    protected float PercentOfMaxSpeed;
+    protected float percentOfMaxSpeed;
     protected float percentOfRotSpeed;
 
     protected virtual void Awake()
@@ -21,19 +21,19 @@ public class Model3D : MonoBehaviour
 
     protected virtual void Update()
     {
-        PercentOfMaxSpeed = (flyer.MoveSpeed - flyer.MinMoveSpeed) / (flyer.MaxMoveSpeed - flyer.MinMoveSpeed);
-        percentOfRotSpeed = flyer.CurrentRotSpeed / flyer.RotateSpeed;
+        percentOfMaxSpeed = (flyer.MoveSpeed - flyer.MinMoveSpeed) / (flyer.MaxMoveSpeed - flyer.MinMoveSpeed);
+        //percentOfRotSpeed = flyer.CurrentRotSpeed / flyer.RotateSpeed;
         CurrentFlyAnimationSpeed();
-        ModelPoseUpdate();
+        //ModelPoseUpdate();
     }
 
     protected virtual void CurrentFlyAnimationSpeed()
     {
         //Debug.Log($"(flyer.CurrentSpeed({flyer.CurrentSpeed}) - flyer.prMinMoveSpeed({flyer.prMinMoveSpeed}))" +
         //          $" / (flyer.prMaxMoveSpeed({flyer.prMaxMoveSpeed}) - flyer.prMinMoveSpeed({flyer.prMinMoveSpeed})) = {prPercentOfMaxSpeed}");
-        if (PercentOfMaxSpeed > 0.001f)
+        if (percentOfMaxSpeed > 0.001f)
         {
-            anim.speed = PercentOfMaxSpeed / 2 + 0.75f;
+            anim.speed = percentOfMaxSpeed / 2 + 0.75f;
         }
         else
         {
@@ -44,11 +44,11 @@ public class Model3D : MonoBehaviour
     protected virtual void ModelPoseUpdate()
     {
         //Change body Roll
-        transform.localEulerAngles = new Vector3(
-            0f,
-            90f+45f * percentOfRotSpeed* PercentOfMaxSpeed,
-            -90f
-            );
+        //transform.localEulerAngles = new Vector3(
+        //    0f,
+        //    90f+45f * percentOfRotSpeed* percentOfMaxSpeed,
+        //    -90f
+        //    );
     }
 
 }

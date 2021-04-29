@@ -5,45 +5,31 @@ using UnityEngine;
 
 public class TestPlayer3D : MonoBehaviour
 {
-    #region InspectorVariables
     //[SerializeField] protected Animator anim;
-
-    [Header("Movement")]
-    public float AccelerationSpeed;
-    public float MoveSpeed;
-    public float MinMoveSpeed;
-    public float MaxMoveSpeed;
-    public float RotateSpeed;
-
+    public Transform Vertical;
     public Transform Body;
 
-    [Header("Border")]
-    public Vector3 CentralMapPoint = new Vector3(0, 30, 0);
-
-    //[Header("Health parameters")]
-    //public int Health;
-    //public bool Alive = true;
-    //public string Race;
-
-    //[Header("Detection")]
-    //public float DetectDistance;
-    //public GameObject Arrow;
-    #endregion
-
-    #region HidenVariales
+    [Header("Movement")]
+    //Forward
+    public float AccelerationSpeed;
+    public float MoveSpeed;
     [HideInInspector] public float CurrentSpeed;
-    [HideInInspector] public float CurrentGoalSpeed;
-    [HideInInspector] public float CurrentRotSpeed;
-    [HideInInspector] public float ChangeSpeed;
-    
+    public float MinMoveSpeed;
+    public float MaxMoveSpeed;
+
+    //Rotation
+    public float AccelerationRotateSpeed;
+    [HideInInspector] public float CurrentHorRotSpeed;
+    [HideInInspector] public float GoalHorRotSpeed;
+    [HideInInspector] public float CurrentVerRotSpeed;
+    [HideInInspector] public float GoalVerRotSpeed;
+    public float MaxRotateSpeed;
+
     [HideInInspector] public float VerticalAngle = 0f;
-    protected bool needFlyToCenter;
 
     protected float gravitySpeedInfluence = 0f;
     protected float gravitySpeedInfluenceChangePerSec = 9f;
     protected float maxGravityInfluence = 20f;
-    protected float minGravityInfluence = -18f;
-    #endregion
 
     [Header("Distant Attack")]
     [Space]
@@ -59,7 +45,7 @@ public class TestPlayer3D : MonoBehaviour
     public int ProjectileDamage;
 
     public int DistantAttackAmmoMax;
-    protected int distantAttackAmmoCurrent = 100;
+    protected int distantAttackAmmoCurrent = 10000;
 
     protected bool canDistantAttack;
     protected float distantAttackTimer;
@@ -80,9 +66,10 @@ public class TestPlayer3D : MonoBehaviour
     void FixedUpdate()
     {
         changeFlySpeed();
-        flyForward();
         rotateHorizontally();
         moveVertical();
+        flyForward();
+        ChangeBodyRotation();
     }
 
     private void Update()
@@ -94,7 +81,7 @@ public class TestPlayer3D : MonoBehaviour
     {
         distantAttackTimer += Time.deltaTime;
 
-        canDistantAttack = distantAttackTimer >= DistantAttackTimerEnd && distantAttackAmmoCurrent > 0 && !needFlyToCenter;
+        canDistantAttack = distantAttackTimer >= DistantAttackTimerEnd && distantAttackAmmoCurrent > 0;
 
         if ((Input.GetKey(KeyCode.F) || CrossPlatformInputManager.GetButton("Shot")) && canDistantAttack)
         {
@@ -124,10 +111,12 @@ public class TestPlayer3D : MonoBehaviour
         distantAttackTimer = 0f;
     }
 
+    bool forwardAcceleration;
+    bool stopAcceleration;
     void changeFlySpeed()
     {
-        bool forwardAcceleration = Input.GetKey(KeyCode.W);
-        bool stopAcceleration = Input.GetKey(KeyCode.S);
+        forwardAcceleration = Input.GetKey(KeyCode.W);
+        stopAcceleration = Input.GetKey(KeyCode.S);
 
         if (forwardAcceleration) MoveSpeed += AccelerationSpeed * Time.deltaTime * Time.timeScale;
         else if (stopAcceleration) MoveSpeed -= AccelerationSpeed * Time.deltaTime * Time.timeScale;
@@ -144,51 +133,93 @@ public class TestPlayer3D : MonoBehaviour
 
     void flyForward()
     {
-        gravitySpeedInfluence = gravitySpeedInfluenceChangePerSec * Mathf.Sin(VerticalAngle * 0.0174533f);
-        /*
-        if (gravitySpeedInfluence > maxGravityInfluence)
-        {
-            gravitySpeedInfluence = maxGravityInfluence;
-        }
-        else if (gravitySpeedInfluence < minGravityInfluence)
-        {
-            gravitySpeedInfluence = minGravityInfluence;
-        }
-        */
+        float sinus = Mathf.Sin(VerticalAngle * 0.0174533f) * -1;
 
-        //Debug.Log(gravitySpeedInfluence);
+        if (sinus < -0.5f && !stopAcceleration)
+        {
+            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime * Time.timeScale;
+        }
+        else if (sinus < -0.5f && stopAcceleration)
+        {
+            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 1f) * Time.deltaTime * Time.timeScale;
+        }
+        else if (sinus >= -0.5f && gravitySpeedInfluence > 0 && !forwardAcceleration)
+        {
+            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime * Time.timeScale;
+        }
+        else if (sinus > 0 && gravitySpeedInfluence <= 0)
+        {
+            gravitySpeedInfluence = -1 * (MoveSpeed * (sinus/2)); 
+        }
 
+        if (gravitySpeedInfluence < 0 && sinus < 0) gravitySpeedInfluence = 0;
+        if (gravitySpeedInfluence > maxGravityInfluence) gravitySpeedInfluence = maxGravityInfluence;
 
         CurrentSpeed = MoveSpeed + gravitySpeedInfluence;
+
         //Move Horizontal
         transform.Translate(CurrentSpeed * Mathf.Cos(VerticalAngle * 0.0174533f) * Vector3.up * Time.deltaTime * Time.timeScale);
 
-        //Debug.Log($"Cos{Mathf.Cos(VerticalAngle * 0.0174533f)}");
-
         //Move Vertical
-        transform.Translate(CurrentSpeed * Mathf.Sin(VerticalAngle * 0.0174533f) * Vector3.forward * Time.deltaTime * Time.timeScale);
-
-        //Debug.Log($"Sin{Mathf.Sin(VerticalAngle * 0.0174533f)}");
+        transform.Translate(-1 * CurrentSpeed * sinus * Vector3.forward * Time.deltaTime * Time.timeScale);
     }
 
     void rotateHorizontally()
     {
-        CurrentRotSpeed = RotateSpeed * -CrossPlatformInputManager.GetAxis("Horizontal");
-        transform.Rotate(CurrentRotSpeed * Time.deltaTime * Time.timeScale * Vector3.forward);
+        GoalHorRotSpeed = MaxRotateSpeed * CrossPlatformInputManager.GetAxis("Horizontal")*-1;
+
+        if(CurrentHorRotSpeed > GoalHorRotSpeed)
+        {
+            CurrentHorRotSpeed -= AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
+            if (CurrentHorRotSpeed - 0.1f < GoalHorRotSpeed && CurrentHorRotSpeed + 0.1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
+        }
+        else if (CurrentHorRotSpeed < GoalHorRotSpeed)
+        {
+            CurrentHorRotSpeed += AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
+            if (CurrentHorRotSpeed - 0.1f < GoalHorRotSpeed && CurrentHorRotSpeed + 0.1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
+        }
+
+        //CurrentHorRotSpeed += AccelerationRotateSpeed * -CrossPlatformInputManager.GetAxis("Horizontal") * Time.deltaTime * Time.timeScale;
+
+        transform.Rotate(CurrentHorRotSpeed * Time.deltaTime * Time.timeScale * Vector3.forward);
     }
 
     void moveVertical()
     {
-        VerticalAngle -= RotateSpeed * CrossPlatformInputManager.GetAxis("Vertical") * Time.deltaTime * Time.timeScale;
+        GoalVerRotSpeed = MaxRotateSpeed * CrossPlatformInputManager.GetAxis("Vertical");
 
-        if (VerticalAngle < -90) VerticalAngle = -90;
-        if (VerticalAngle > 90) VerticalAngle = 90;
+        if (CurrentVerRotSpeed > GoalVerRotSpeed)
+        {
+            CurrentVerRotSpeed -= AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
+            if (CurrentVerRotSpeed - 0.1f < GoalVerRotSpeed && CurrentVerRotSpeed + 0.1f > GoalVerRotSpeed) CurrentVerRotSpeed = GoalVerRotSpeed;
+        }
+        else if (CurrentVerRotSpeed < GoalVerRotSpeed)
+        {
+            CurrentVerRotSpeed += AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
+            if (CurrentVerRotSpeed - 0.1f < GoalVerRotSpeed && CurrentVerRotSpeed + 0.1f > GoalVerRotSpeed) CurrentVerRotSpeed = GoalVerRotSpeed;
+        }
 
-        Body.localEulerAngles = new Vector3(
+        VerticalAngle -= CurrentVerRotSpeed  * Time.deltaTime * Time.timeScale;
+
+        //if (VerticalAngle < -90) VerticalAngle = -90;
+        //if (VerticalAngle > 90) VerticalAngle = 90;
+    }
+
+    void ChangeBodyRotation()
+    {
+        float percentOfMaxSpeed = (MoveSpeed - MinMoveSpeed) / (MaxMoveSpeed - MinMoveSpeed);
+        float percentOfRotSpeed = CurrentHorRotSpeed / MaxRotateSpeed;
+
+        Vertical.localEulerAngles = new Vector3(
             VerticalAngle,
             0f,
             0f
             );
 
+        Body.transform.localEulerAngles = new Vector3(
+            0f,
+            90f + 45f * percentOfRotSpeed * percentOfMaxSpeed,
+            -90f
+            );
     }
 }
