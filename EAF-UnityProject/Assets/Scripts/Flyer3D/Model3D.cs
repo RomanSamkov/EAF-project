@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityStandardAssets.CrossPlatformInput;
 using UnityEngine;
 
 public class Model3D : MonoBehaviour
@@ -10,8 +11,24 @@ public class Model3D : MonoBehaviour
     protected Animator anim;
     public TestPlayer3D flyer;
 
+    public Transform Neck;
+
+    public Transform Pelvis_L;
+    public Transform Pelvis_R;
+
+    public Transform UpperMane1;
+    public Transform UpperMane2;
+    public Transform BackMane1;
+    public Transform BackMane2;
+
+    public Transform Tail1;
+    public Transform Tail2;
+    public Transform Tail3;
+    public Transform Tail4;
+
     protected float percentOfMaxSpeed;
-    protected float percentOfRotSpeed;
+    protected float percentOfHorRotSpeed;
+    protected float percentOfVerRotSpeed;
 
     protected virtual void Awake()
     {
@@ -19,12 +36,98 @@ public class Model3D : MonoBehaviour
         flyer = flyer.GetComponent<TestPlayer3D>();
     }
 
+    private void Start()
+    {
+        
+    }
+
+    float animMoveSpeedTime1;
+    float animMoveSpeedTime2;
+    float animMoveSpeedTime3;
+    float animMoveSpeedTime4;
+
     protected virtual void Update()
     {
-        percentOfMaxSpeed = (flyer.MoveSpeed - flyer.MinMoveSpeed) / (flyer.MaxMoveSpeed - flyer.MinMoveSpeed);
-        //percentOfRotSpeed = flyer.CurrentRotSpeed / flyer.RotateSpeed;
+        percentOfMaxSpeed = flyer.MoveSpeed / flyer.MaxMoveSpeed;
+        percentOfHorRotSpeed = flyer.CurrentHorRotSpeed / flyer.MaxRotSpeed;
+        percentOfVerRotSpeed = flyer.CurrentVerRotSpeed / flyer.MaxRotSpeed;
+
         CurrentFlyAnimationSpeed();
-        //ModelPoseUpdate();
+
+        Neck.localEulerAngles = new Vector3(
+           25f * CrossPlatformInputManager.GetAxis("Horizontal"),
+           25f * CrossPlatformInputManager.GetAxis("Horizontal"),
+           -26f - 15f * CrossPlatformInputManager.GetAxis("Vertical") + (-20 * Mathf.Abs(CrossPlatformInputManager.GetAxis("Horizontal")) * percentOfMaxSpeed)
+           );
+
+        Pelvis_L.localEulerAngles = new Vector3(
+           -16f + 16*(percentOfMaxSpeed-0.8f),
+           -25f + 3* percentOfMaxSpeed,
+           82f - 8*percentOfMaxSpeed
+           );
+
+        Pelvis_R.localEulerAngles = new Vector3(
+           -16f + 16 * (percentOfMaxSpeed - 0.8f),
+           25f - 3*percentOfMaxSpeed,
+           -82f + 8 * percentOfMaxSpeed
+           );
+
+        animMoveSpeedTime1 += Time.deltaTime * ((percentOfMaxSpeed + 0.5f) * 2) * 5f;
+        animMoveSpeedTime2 += Time.deltaTime * ((percentOfMaxSpeed + 0.5f) * 2) * 7f;
+        animMoveSpeedTime3 += Time.deltaTime * ((percentOfMaxSpeed + 0.5f) * 2) * 9f;
+        animMoveSpeedTime4 += Time.deltaTime * ((percentOfMaxSpeed + 0.5f) * 2) * 15f;
+
+        //UpperMane
+        UpperMane1.localEulerAngles = new Vector3(
+           20 * -percentOfHorRotSpeed,
+           -90f,
+           -30f + 20 * Mathf.Sin(animMoveSpeedTime3)
+           );
+
+        UpperMane2.localEulerAngles = new Vector3(
+           0f,
+           0f,
+           10 + -12 * Mathf.Sin(animMoveSpeedTime4)
+           );
+
+        //BackMane
+        BackMane1.localEulerAngles = new Vector3(
+           0,
+           0,
+           10 + -12 * Mathf.Sin(animMoveSpeedTime2) + 20 * percentOfHorRotSpeed
+           );
+
+        BackMane2.localEulerAngles = new Vector3(
+           0,
+           0,
+           20 * Mathf.Sin(animMoveSpeedTime3)
+           );
+
+        //Tail
+        Tail1.localEulerAngles = new Vector3(
+           0f,
+           -(percentOfVerRotSpeed*10)+(-10f*percentOfMaxSpeed*Mathf.Abs(percentOfHorRotSpeed)),
+           -90f + 3.5f* Mathf.Sin(animMoveSpeedTime1) + percentOfHorRotSpeed * 10f
+           );
+
+        Tail2.localEulerAngles = new Vector3(
+           Mathf.Sin(animMoveSpeedTime1) * 5,
+           0f,
+           5f * Mathf.Sin(animMoveSpeedTime2) + percentOfHorRotSpeed * 6f + (5f * Mathf.Sin(animMoveSpeedTime1) + percentOfHorRotSpeed * 10f)
+           );
+
+        Tail3.localEulerAngles = new Vector3(
+           Mathf.Sin(animMoveSpeedTime2) * 5,
+           0f,
+           5f * Mathf.Sin(animMoveSpeedTime3)
+           );
+
+        Tail4.localEulerAngles = new Vector3(
+           0f,
+           0f,
+           5f * Mathf.Sin(animMoveSpeedTime4)
+           );
+
     }
 
     protected virtual void CurrentFlyAnimationSpeed()
@@ -43,12 +146,7 @@ public class Model3D : MonoBehaviour
 
     protected virtual void ModelPoseUpdate()
     {
-        //Change body Roll
-        //transform.localEulerAngles = new Vector3(
-        //    0f,
-        //    90f+45f * percentOfRotSpeed* percentOfMaxSpeed,
-        //    -90f
-        //    );
+        
     }
 
 }

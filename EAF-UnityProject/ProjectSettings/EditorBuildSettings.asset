@@ -44,7 +44,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Survival.unity
     guid: 11c5424cf559c694cad468aa801b53c8
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/GRF F lvl1.unity
     guid: a9b317d4f61a0584b946cf87ffee455a
   - enabled: 0

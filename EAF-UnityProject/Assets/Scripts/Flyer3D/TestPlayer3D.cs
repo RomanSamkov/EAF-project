@@ -23,7 +23,7 @@ public class TestPlayer3D : MonoBehaviour
     [HideInInspector] public float GoalHorRotSpeed;
     [HideInInspector] public float CurrentVerRotSpeed;
     [HideInInspector] public float GoalVerRotSpeed;
-    public float MaxRotateSpeed;
+    public float MaxRotSpeed;
 
     [HideInInspector] public float VerticalAngle = 0f;
 
@@ -115,8 +115,8 @@ public class TestPlayer3D : MonoBehaviour
     bool stopAcceleration;
     void changeFlySpeed()
     {
-        forwardAcceleration = Input.GetKey(KeyCode.W);
-        stopAcceleration = Input.GetKey(KeyCode.S);
+        forwardAcceleration = Input.GetKey(KeyCode.W) || CrossPlatformInputManager.GetButton("Move Forward");
+        stopAcceleration = Input.GetKey(KeyCode.S) || CrossPlatformInputManager.GetButton("Stop");
 
         if (forwardAcceleration) MoveSpeed += AccelerationSpeed * Time.deltaTime * Time.timeScale;
         else if (stopAcceleration) MoveSpeed -= AccelerationSpeed * Time.deltaTime * Time.timeScale;
@@ -166,27 +166,25 @@ public class TestPlayer3D : MonoBehaviour
 
     void rotateHorizontally()
     {
-        GoalHorRotSpeed = MaxRotateSpeed * CrossPlatformInputManager.GetAxis("Horizontal")*-1;
+        GoalHorRotSpeed = MaxRotSpeed * CrossPlatformInputManager.GetAxis("Horizontal")*-1;
 
         if(CurrentHorRotSpeed > GoalHorRotSpeed)
         {
             CurrentHorRotSpeed -= AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
-            if (CurrentHorRotSpeed - 0.1f < GoalHorRotSpeed && CurrentHorRotSpeed + 0.1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
+            if (CurrentHorRotSpeed - 1f < GoalHorRotSpeed && CurrentHorRotSpeed + 1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
         }
         else if (CurrentHorRotSpeed < GoalHorRotSpeed)
         {
             CurrentHorRotSpeed += AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
-            if (CurrentHorRotSpeed - 0.1f < GoalHorRotSpeed && CurrentHorRotSpeed + 0.1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
+            if (CurrentHorRotSpeed - 1f < GoalHorRotSpeed && CurrentHorRotSpeed + 1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
         }
-
-        //CurrentHorRotSpeed += AccelerationRotateSpeed * -CrossPlatformInputManager.GetAxis("Horizontal") * Time.deltaTime * Time.timeScale;
 
         transform.Rotate(CurrentHorRotSpeed * Time.deltaTime * Time.timeScale * Vector3.forward);
     }
 
     void moveVertical()
     {
-        GoalVerRotSpeed = MaxRotateSpeed * CrossPlatformInputManager.GetAxis("Vertical");
+        GoalVerRotSpeed = MaxRotSpeed * CrossPlatformInputManager.GetAxis("Vertical");
 
         if (CurrentVerRotSpeed > GoalVerRotSpeed)
         {
@@ -200,15 +198,12 @@ public class TestPlayer3D : MonoBehaviour
         }
 
         VerticalAngle -= CurrentVerRotSpeed  * Time.deltaTime * Time.timeScale;
-
-        //if (VerticalAngle < -90) VerticalAngle = -90;
-        //if (VerticalAngle > 90) VerticalAngle = 90;
     }
 
     void ChangeBodyRotation()
     {
         float percentOfMaxSpeed = (MoveSpeed - MinMoveSpeed) / (MaxMoveSpeed - MinMoveSpeed);
-        float percentOfRotSpeed = CurrentHorRotSpeed / MaxRotateSpeed;
+        float percentOfRotSpeed = CurrentHorRotSpeed / MaxRotSpeed;
 
         Vertical.localEulerAngles = new Vector3(
             VerticalAngle,
@@ -221,5 +216,7 @@ public class TestPlayer3D : MonoBehaviour
             90f + 45f * percentOfRotSpeed * percentOfMaxSpeed,
             -90f
             );
+
+        //Debug.Log($"percentOfRotSpeed ({percentOfRotSpeed}) * percentOfMaxSpeed({percentOfMaxSpeed}) = {percentOfRotSpeed * percentOfMaxSpeed}");
     }
 }
