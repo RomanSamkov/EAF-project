@@ -40,6 +40,7 @@ public class TestPlayer3D : MonoBehaviour
     public AudioSource DistantAttackAudioSource;
     public ParticleSystem SmokeMuzzleTrailPS;
 
+    public float RandomSpreadAngle;
     public float ProjectileSpeed;
     public float ProjectileLifeTime;
     public int ProjectileDamage;
@@ -93,6 +94,11 @@ public class TestPlayer3D : MonoBehaviour
     {
         SmokeMuzzleTrailPS.Play();
 
+
+
+        Instantiate(BulletPR, DistantAttackPoint.position, Vertical.rotation);
+
+        /*
         GameObject projectileGO = Instantiate(BulletPR, DistantAttackPoint.position, DistantAttackPoint.rotation);
         ProjectileG3 projectileSC = projectileGO.GetComponent<ProjectileG3>();
         projectileSC.DamageAmount = ProjectileDamage;
@@ -100,6 +106,7 @@ public class TestPlayer3D : MonoBehaviour
         projectileSC.Speed = ProjectileSpeed;
         projectileSC.DeactivateTimer = ProjectileLifeTime;
         //projectileSC.Team = teamSeparator.Team;
+        */
 
         distantAttackAmmoCurrent -= 1;
 
@@ -118,8 +125,8 @@ public class TestPlayer3D : MonoBehaviour
         forwardAcceleration = Input.GetKey(KeyCode.W) || CrossPlatformInputManager.GetButton("Move Forward");
         stopAcceleration = Input.GetKey(KeyCode.S) || CrossPlatformInputManager.GetButton("Stop");
 
-        if (forwardAcceleration) MoveSpeed += AccelerationSpeed * Time.deltaTime * Time.timeScale;
-        else if (stopAcceleration) MoveSpeed -= AccelerationSpeed * Time.deltaTime * Time.timeScale;
+        if (forwardAcceleration) MoveSpeed += AccelerationSpeed * Time.deltaTime;
+        else if (stopAcceleration) MoveSpeed -= AccelerationSpeed * Time.deltaTime;
 
         if (MoveSpeed > MaxMoveSpeed)
         {
@@ -133,19 +140,19 @@ public class TestPlayer3D : MonoBehaviour
 
     void flyForward()
     {
-        float sinus = Mathf.Sin(VerticalAngle * 0.0174533f) * -1;
+        float sinus = Mathf.Sin(VerticalAngle * 0.0174533f);
 
         if (sinus < -0.5f && !stopAcceleration)
         {
-            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime * Time.timeScale;
+            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime;
         }
         else if (sinus < -0.5f && stopAcceleration)
         {
-            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 1f) * Time.deltaTime * Time.timeScale;
+            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 1f) * Time.deltaTime;
         }
         else if (sinus >= -0.5f && gravitySpeedInfluence > 0 && !forwardAcceleration)
         {
-            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime * Time.timeScale;
+            gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime;
         }
         else if (sinus > 0 && gravitySpeedInfluence <= 0)
         {
@@ -158,28 +165,28 @@ public class TestPlayer3D : MonoBehaviour
         CurrentSpeed = MoveSpeed + gravitySpeedInfluence;
 
         //Move Horizontal
-        transform.Translate(CurrentSpeed * Mathf.Cos(VerticalAngle * 0.0174533f) * Vector3.up * Time.deltaTime * Time.timeScale);
+        transform.Translate(CurrentSpeed * Mathf.Cos(VerticalAngle * 0.0174533f) * Vector3.forward * Time.deltaTime);
 
         //Move Vertical
-        transform.Translate(-1 * CurrentSpeed * sinus * Vector3.forward * Time.deltaTime * Time.timeScale);
+        transform.Translate(-1 * CurrentSpeed * sinus * Vector3.up * Time.deltaTime);
     }
 
     void rotateHorizontally()
     {
-        GoalHorRotSpeed = MaxRotSpeed * CrossPlatformInputManager.GetAxis("Horizontal")*-1;
+        GoalHorRotSpeed = MaxRotSpeed * CrossPlatformInputManager.GetAxis("Horizontal");
 
         if(CurrentHorRotSpeed > GoalHorRotSpeed)
         {
-            CurrentHorRotSpeed -= AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
-            if (CurrentHorRotSpeed - 1f < GoalHorRotSpeed && CurrentHorRotSpeed + 1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
+            CurrentHorRotSpeed -= AccelerationRotateSpeed * Time.deltaTime;
+            if (CurrentHorRotSpeed - 2f < GoalHorRotSpeed && CurrentHorRotSpeed + 2f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
         }
         else if (CurrentHorRotSpeed < GoalHorRotSpeed)
         {
-            CurrentHorRotSpeed += AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
-            if (CurrentHorRotSpeed - 1f < GoalHorRotSpeed && CurrentHorRotSpeed + 1f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
+            CurrentHorRotSpeed += AccelerationRotateSpeed * Time.deltaTime;
+            if (CurrentHorRotSpeed - 2f < GoalHorRotSpeed && CurrentHorRotSpeed + 2f > GoalHorRotSpeed) CurrentHorRotSpeed = GoalHorRotSpeed;
         }
 
-        transform.Rotate(CurrentHorRotSpeed * Time.deltaTime * Time.timeScale * Vector3.forward);
+        transform.Rotate(CurrentHorRotSpeed * Time.deltaTime * Vector3.up);
     }
 
     void moveVertical()
@@ -188,16 +195,16 @@ public class TestPlayer3D : MonoBehaviour
 
         if (CurrentVerRotSpeed > GoalVerRotSpeed)
         {
-            CurrentVerRotSpeed -= AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
-            if (CurrentVerRotSpeed - 0.1f < GoalVerRotSpeed && CurrentVerRotSpeed + 0.1f > GoalVerRotSpeed) CurrentVerRotSpeed = GoalVerRotSpeed;
+            CurrentVerRotSpeed -= AccelerationRotateSpeed * Time.deltaTime;
+            if (CurrentVerRotSpeed - 2f < GoalVerRotSpeed && CurrentVerRotSpeed + 2f > GoalVerRotSpeed) CurrentVerRotSpeed = GoalVerRotSpeed;
         }
         else if (CurrentVerRotSpeed < GoalVerRotSpeed)
         {
-            CurrentVerRotSpeed += AccelerationRotateSpeed * Time.deltaTime * Time.timeScale;
-            if (CurrentVerRotSpeed - 0.1f < GoalVerRotSpeed && CurrentVerRotSpeed + 0.1f > GoalVerRotSpeed) CurrentVerRotSpeed = GoalVerRotSpeed;
+            CurrentVerRotSpeed += AccelerationRotateSpeed * Time.deltaTime;
+            if (CurrentVerRotSpeed - 2f < GoalVerRotSpeed && CurrentVerRotSpeed + 2f > GoalVerRotSpeed) CurrentVerRotSpeed = GoalVerRotSpeed;
         }
 
-        VerticalAngle -= CurrentVerRotSpeed  * Time.deltaTime * Time.timeScale;
+        VerticalAngle -= CurrentVerRotSpeed  * Time.deltaTime;
     }
 
     void ChangeBodyRotation()
@@ -212,9 +219,9 @@ public class TestPlayer3D : MonoBehaviour
             );
 
         Body.transform.localEulerAngles = new Vector3(
-            0f,
-            90f + 45f * percentOfRotSpeed * percentOfMaxSpeed,
-            -90f
+            45f * percentOfRotSpeed * percentOfMaxSpeed,
+            90,
+            0
             );
 
         //Debug.Log($"percentOfRotSpeed ({percentOfRotSpeed}) * percentOfMaxSpeed({percentOfMaxSpeed}) = {percentOfRotSpeed * percentOfMaxSpeed}");

@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/GRF F lvl1.unity
+- path: Assets/Scenes/Test3DScene.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

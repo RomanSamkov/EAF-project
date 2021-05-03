@@ -79,7 +79,7 @@ public class Model3D : MonoBehaviour
 
         //UpperMane
         UpperMane1.localEulerAngles = new Vector3(
-           20 * -percentOfHorRotSpeed,
+           20 * percentOfHorRotSpeed,
            -90f,
            -30f + 20 * Mathf.Sin(animMoveSpeedTime3)
            );
@@ -94,7 +94,7 @@ public class Model3D : MonoBehaviour
         BackMane1.localEulerAngles = new Vector3(
            0,
            0,
-           10 + -12 * Mathf.Sin(animMoveSpeedTime2) + 20 * percentOfHorRotSpeed
+           10 + -12 * Mathf.Sin(animMoveSpeedTime2) + 20 * -percentOfHorRotSpeed
            );
 
         BackMane2.localEulerAngles = new Vector3(
@@ -107,13 +107,13 @@ public class Model3D : MonoBehaviour
         Tail1.localEulerAngles = new Vector3(
            0f,
            -(percentOfVerRotSpeed*10)+(-10f*percentOfMaxSpeed*Mathf.Abs(percentOfHorRotSpeed)),
-           -90f + 3.5f* Mathf.Sin(animMoveSpeedTime1) + percentOfHorRotSpeed * 10f
+           -90f - 3.5f* Mathf.Sin(animMoveSpeedTime1) - percentOfHorRotSpeed * 10f
            );
 
         Tail2.localEulerAngles = new Vector3(
            Mathf.Sin(animMoveSpeedTime1) * 5,
            0f,
-           5f * Mathf.Sin(animMoveSpeedTime2) + percentOfHorRotSpeed * 6f + (5f * Mathf.Sin(animMoveSpeedTime1) + percentOfHorRotSpeed * 10f)
+           5f * Mathf.Sin(animMoveSpeedTime2) - percentOfHorRotSpeed * 6f - (5f * Mathf.Sin(animMoveSpeedTime1) - percentOfHorRotSpeed * 10f)
            );
 
         Tail3.localEulerAngles = new Vector3(

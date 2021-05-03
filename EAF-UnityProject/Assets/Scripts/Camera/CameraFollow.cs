@@ -33,10 +33,10 @@ public class CameraFollow : MonoBehaviour
         transform.Rotate(temporary_rotation);
 
         Vector3 desiredPosition = Target.position
-            + Target.up * OffsetVec.x
-            + Target.up * speedForwardChange * CrossPlatformInputManager.GetAxis("Vertical")
-            + Target.forward * OffsetVec.y*-1
-            + Target.forward * speedHeightChange * CrossPlatformInputManager.GetAxis("Vertical")*-1
+            + Target.forward * OffsetVec.x
+            + Target.forward * speedForwardChange * CrossPlatformInputManager.GetAxis("Vertical")
+            + Target.up * OffsetVec.y
+            + Target.up * speedHeightChange * CrossPlatformInputManager.GetAxis("Vertical")
             + Target.right * rotationSpeedChange * CrossPlatformInputManager.GetAxis("Horizontal");
 
         transform.position = desiredPosition;
