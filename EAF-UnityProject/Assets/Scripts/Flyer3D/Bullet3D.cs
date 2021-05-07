@@ -6,6 +6,10 @@ public class Bullet3D : MonoBehaviour
 {
     //rot.x = 0 is horizontal
 
+    public GameObject GroundHitPR;
+
+    //public Transform ForwardPos;
+
     public float AirStopEffectPerSec;
     public float StartSpeed;
     public float CurrentSpeed;
@@ -19,9 +23,12 @@ public class Bullet3D : MonoBehaviour
     float sinus;
     float cosine;
 
+    protected int layerLevelMask;
+
     void Start()
     {
         CurrentSpeed = StartSpeed;
+        layerLevelMask = LayerMask.GetMask("Level");
         Invoke("DeactivateGameObject", DeactivateTimer);
     }
 
@@ -33,7 +40,7 @@ public class Bullet3D : MonoBehaviour
         CurrentGravityInfluence += GravityAcceleration * Time.deltaTime;
         CurrentSpeed -= AirStopEffectPerSec * Time.deltaTime;
         */
-
+        RayCastCheck();
         //forward
         transform.Translate(CurrentSpeed * Vector3.forward * Time.deltaTime);
 
@@ -44,6 +51,23 @@ public class Bullet3D : MonoBehaviour
         
     }
 
+    void RayCastCheck()
+    {
+        if (Physics.Linecast(transform.position + Vector3.forward * -1.5f, transform.position + Vector3.forward*1.5f, layerLevelMask)
+            || Physics.Linecast(transform.position + Vector3.up * 0.5f, transform.position + Vector3.up * -0.5f, layerLevelMask)
+            || Physics.Linecast(transform.position + Vector3.right * 0.5f, transform.position + Vector3.right * -0.5f, layerLevelMask))
+
+        {
+            Instantiate(GroundHitPR, transform.position, Quaternion.identity);
+            DeactivateGameObject();
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(transform.position + Vector3.forward * -1.5f, transform.position + Vector3.forward * 1.5f);
+        Gizmos.DrawLine(transform.position + Vector3.up * 0.5f, transform.position + Vector3.up * -0.5f);
+    }
 
 
     public void DeactivateGameObject()

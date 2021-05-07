@@ -541,6 +541,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e70c1f631fe2af418243a338a6f0da7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GroundHitPR: {fileID: 7890953061068454428, guid: 8b22a2978368de04e8e32e50dd4a262c,
+    type: 3}
   AirStopEffectPerSec: 10
   StartSpeed: 135
   CurrentSpeed: 0

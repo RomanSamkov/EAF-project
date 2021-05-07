@@ -55,12 +55,16 @@ public class TestPlayer3D : MonoBehaviour
     [Space]
     [Header("Other Visuals")]
     public ParticleSystem SmokeTrailPS;
+    public GameObject ForwardGroundHitPR;
+    public GameObject DownGroundHitPR;
 
 
+
+    protected int layerLevelMask;
     // Start is called before the first frame update
     void Start()
     {
-        
+        layerLevelMask = LayerMask.GetMask("Level");
     }
 
     // Update is called once per frame
@@ -70,7 +74,8 @@ public class TestPlayer3D : MonoBehaviour
         rotateHorizontally();
         moveVertical();
         flyForward();
-        ChangeBodyRotation();
+        changeBodyRotation();
+        rayCastCollision();
     }
 
     private void Update()
@@ -94,9 +99,11 @@ public class TestPlayer3D : MonoBehaviour
     {
         SmokeMuzzleTrailPS.Play();
 
+        Vector3 randRot = Vertical.eulerAngles;
+        randRot += new Vector3(Random.Range(-RandomSpreadAngle, RandomSpreadAngle), Random.Range(-RandomSpreadAngle, RandomSpreadAngle), 0f);
 
 
-        Instantiate(BulletPR, DistantAttackPoint.position, Vertical.rotation);
+        Instantiate(BulletPR, DistantAttackPoint.position, Quaternion.Euler(randRot));
 
         /*
         GameObject projectileGO = Instantiate(BulletPR, DistantAttackPoint.position, DistantAttackPoint.rotation);
@@ -138,9 +145,12 @@ public class TestPlayer3D : MonoBehaviour
         }
     }
 
+    float sinus;
+    float cosine;
     void flyForward()
     {
-        float sinus = Mathf.Sin(VerticalAngle * 0.0174533f);
+        sinus = Mathf.Sin(VerticalAngle * 0.0174533f);
+        cosine = Mathf.Cos(VerticalAngle * 0.0174533f);
 
         if (sinus < -0.5f && !stopAcceleration)
         {
@@ -165,7 +175,7 @@ public class TestPlayer3D : MonoBehaviour
         CurrentSpeed = MoveSpeed + gravitySpeedInfluence;
 
         //Move Horizontal
-        transform.Translate(CurrentSpeed * Mathf.Cos(VerticalAngle * 0.0174533f) * Vector3.forward * Time.deltaTime);
+        transform.Translate(CurrentSpeed * cosine * Vector3.forward * Time.deltaTime);
 
         //Move Vertical
         transform.Translate(-1 * CurrentSpeed * sinus * Vector3.up * Time.deltaTime);
@@ -207,7 +217,7 @@ public class TestPlayer3D : MonoBehaviour
         VerticalAngle -= CurrentVerRotSpeed  * Time.deltaTime;
     }
 
-    void ChangeBodyRotation()
+    void changeBodyRotation()
     {
         float percentOfMaxSpeed = (MoveSpeed - MinMoveSpeed) / (MaxMoveSpeed - MinMoveSpeed);
         float percentOfRotSpeed = CurrentHorRotSpeed / MaxRotSpeed;
@@ -225,5 +235,106 @@ public class TestPlayer3D : MonoBehaviour
             );
 
         //Debug.Log($"percentOfRotSpeed ({percentOfRotSpeed}) * percentOfMaxSpeed({percentOfMaxSpeed}) = {percentOfRotSpeed * percentOfMaxSpeed}");
+    }
+
+    [Header("RayCastCollisionPoints")]
+
+    public Transform ForwardRayCastPoint;
+    public Transform ForwardRayCastPoint2;
+    public Transform LeftHorRayCastPoint;
+    public Transform RightHorRayCastPoint;
+    public Transform ForwardDownRayCastPoint;
+
+
+    void rayCastCollision()
+    {
+        //Forward ray
+        if (Physics.Linecast(Vertical.transform.position, ForwardRayCastPoint.position, layerLevelMask)
+            || Physics.Linecast(Vertical.transform.position, ForwardRayCastPoint2.position, layerLevelMask))
+        {
+            if (CurrentSpeed > 10)
+                Instantiate(ForwardGroundHitPR, ForwardRayCastPoint.position, Vertical.rotation);  
+
+            if (CurrentSpeed > 6)
+                while (Physics.Linecast(transform.position, ForwardRayCastPoint.position, layerLevelMask))
+                {
+                    //Move Horizontal
+                    transform.Translate(-1 * cosine * Vector3.forward);
+
+                    //Move Vertical
+                    transform.Translate(1 * sinus * Vector3.up);
+                }
+
+            MoveSpeed = 0;
+            gravitySpeedInfluence = 0;
+
+        }
+
+        if (Physics.Linecast(Vertical.transform.position, ForwardDownRayCastPoint.position, layerLevelMask))
+        {
+            if (CurrentSpeed > 6)
+                Instantiate(DownGroundHitPR, ForwardRayCastPoint.position, ForwardDownRayCastPoint.rotation);
+
+            for (int i = 0; i < 360; i++)
+            {
+                VerticalAngle -= 1;
+
+                Vertical.localEulerAngles = new Vector3(
+                    VerticalAngle,
+                    0f,
+                    0f
+                );
+
+                if (MoveSpeed > 0.5f)
+                    MoveSpeed -= 0.5f;
+                else MoveSpeed = 0f;
+
+                if (!Physics.Linecast(transform.position, ForwardDownRayCastPoint.position, layerLevelMask))
+                {
+                    break;
+                }
+            }
+
+        }
+
+        if (Physics.Linecast(Vertical.transform.position, LeftHorRayCastPoint.position, layerLevelMask))
+        {
+            if (CurrentSpeed > 8)
+                Instantiate(DownGroundHitPR, LeftHorRayCastPoint.position, ForwardDownRayCastPoint.rotation);
+
+            for (int i = 0; i < 360; i++)
+            {
+                transform.Rotate(1 * Vector3.up);
+
+                if (MoveSpeed > 0.5f)
+                    MoveSpeed -= 0.5f;
+                else MoveSpeed = 0f;
+
+                if (!Physics.Linecast(transform.position, LeftHorRayCastPoint.position, layerLevelMask))
+                    break;
+            }
+
+        }
+
+        if (Physics.Linecast(Vertical.transform.position, RightHorRayCastPoint.position, layerLevelMask))
+        {
+            if (CurrentSpeed > 8)
+                Instantiate(DownGroundHitPR, RightHorRayCastPoint.position, ForwardDownRayCastPoint.rotation);
+
+            for (int i = 0; i < 360; i++)
+            {
+                transform.Rotate(-1 * Vector3.up);
+
+                if (MoveSpeed > 0.5f)
+                    MoveSpeed -= 0.5f;
+                else MoveSpeed = 0f;
+
+                if (!Physics.Linecast(transform.position, RightHorRayCastPoint.position, layerLevelMask))
+                    break;
+            }
+
+        }
+
+
     }
 }

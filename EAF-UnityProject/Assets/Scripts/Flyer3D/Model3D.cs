@@ -13,8 +13,11 @@ public class Model3D : MonoBehaviour
 
     public Transform Neck;
 
-    public Transform Pelvis_L;
-    public Transform Pelvis_R;
+    public Transform LeftHoofRadius;
+    public Transform RightHoofRadius;
+    
+    public Transform BackHoof_Pelvis_L;
+    public Transform BackHoof_Pelvis_R;
 
     public Transform UpperMane1;
     public Transform UpperMane2;
@@ -48,6 +51,11 @@ public class Model3D : MonoBehaviour
 
     protected virtual void Update()
     {
+        //Set pos
+        LeftHoofRadius.localEulerAngles = new Vector3(335.035309f, 9.48493004f, 34.9138718f);
+        RightHoofRadius.localEulerAngles = new Vector3(322.307373f, 352.29187f, 341.792572f);
+
+        //Procedural Positions
         percentOfMaxSpeed = flyer.MoveSpeed / flyer.MaxMoveSpeed;
         percentOfHorRotSpeed = flyer.CurrentHorRotSpeed / flyer.MaxRotSpeed;
         percentOfVerRotSpeed = flyer.CurrentVerRotSpeed / flyer.MaxRotSpeed;
@@ -60,13 +68,13 @@ public class Model3D : MonoBehaviour
            -26f - 15f * CrossPlatformInputManager.GetAxis("Vertical") + (-20 * Mathf.Abs(CrossPlatformInputManager.GetAxis("Horizontal")) * percentOfMaxSpeed)
            );
 
-        Pelvis_L.localEulerAngles = new Vector3(
+        BackHoof_Pelvis_L.localEulerAngles = new Vector3(
            -16f + 16*(percentOfMaxSpeed-0.8f),
            -25f + 3* percentOfMaxSpeed,
            82f - 8*percentOfMaxSpeed
            );
 
-        Pelvis_R.localEulerAngles = new Vector3(
+        BackHoof_Pelvis_R.localEulerAngles = new Vector3(
            -16f + 16 * (percentOfMaxSpeed - 0.8f),
            25f - 3*percentOfMaxSpeed,
            -82f + 8 * percentOfMaxSpeed
