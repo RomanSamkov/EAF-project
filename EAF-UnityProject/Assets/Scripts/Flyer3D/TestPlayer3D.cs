@@ -151,7 +151,7 @@ public class TestPlayer3D : MonoBehaviour
     {
         sinus = Mathf.Sin(VerticalAngle * 0.0174533f);
         cosine = Mathf.Cos(VerticalAngle * 0.0174533f);
-
+        /*
         if (sinus < -0.5f && !stopAcceleration)
         {
             gravitySpeedInfluence -= gravitySpeedInfluenceChangePerSec * (sinus + 0.5f) * Time.deltaTime;
@@ -171,7 +171,7 @@ public class TestPlayer3D : MonoBehaviour
 
         if (gravitySpeedInfluence < 0 && sinus < 0) gravitySpeedInfluence = 0;
         if (gravitySpeedInfluence > maxGravityInfluence) gravitySpeedInfluence = maxGravityInfluence;
-
+        */
         CurrentSpeed = MoveSpeed + gravitySpeedInfluence;
 
         //Move Horizontal
@@ -335,6 +335,11 @@ public class TestPlayer3D : MonoBehaviour
 
         }
 
+    }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(DistantAttackPoint.transform.position, DistantAttackPoint.transform.position + DistantAttackPoint.transform.forward * 100f);
+        Gizmos.DrawWireSphere(transform.position, 3f);
     }
 }

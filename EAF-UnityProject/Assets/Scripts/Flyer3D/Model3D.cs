@@ -13,8 +13,11 @@ public class Model3D : MonoBehaviour
 
     public Transform Neck;
 
-    public Transform LeftHoofRadius;
-    public Transform RightHoofRadius;
+    public Transform Humerus_L;
+    public Transform Radius_L;
+    public Transform Cannon_L;
+
+    public Transform Radius_R;
     
     public Transform BackHoof_Pelvis_L;
     public Transform BackHoof_Pelvis_R;
@@ -52,8 +55,19 @@ public class Model3D : MonoBehaviour
     protected virtual void Update()
     {
         //Set pos
-        LeftHoofRadius.localEulerAngles = new Vector3(335.035309f, 9.48493004f, 34.9138718f);
-        RightHoofRadius.localEulerAngles = new Vector3(322.307373f, 352.29187f, 341.792572f);
+        Humerus_L.localEulerAngles = new Vector3(23.8569126f, 138.321777f, 300.185852f);
+        Radius_L.localEulerAngles = new Vector3(332.036469f, 29.9475594f, 26.9457016f);
+
+        if (Input.GetKey(KeyCode.F) || CrossPlatformInputManager.GetButton("Shot"))
+        {
+            Cannon_L.localEulerAngles = new Vector3(278.648621f, 215.928024f, 137.623764f);
+        }
+        else
+        {
+            Cannon_L.localEulerAngles = new Vector3(279.002136f, 313.857086f, 40.3708839f);
+        }
+
+        Radius_R.localEulerAngles = new Vector3(322.307373f, 352.29187f, 341.792572f);
 
         //Procedural Positions
         percentOfMaxSpeed = flyer.MoveSpeed / flyer.MaxMoveSpeed;

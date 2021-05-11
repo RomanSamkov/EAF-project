@@ -8,6 +8,8 @@ public class Bullet3D : MonoBehaviour
 
     public GameObject GroundHitPR;
 
+    public Transform Body;
+
     //public Transform ForwardPos;
 
     public float AirStopEffectPerSec;
@@ -18,10 +20,7 @@ public class Bullet3D : MonoBehaviour
 
     public float DeactivateTimer;
 
-    float VerticalAngle;
-
-    float sinus;
-    float cosine;
+    protected Vector3 PointOfDirection;
 
     protected int layerLevelMask;
 
@@ -34,13 +33,8 @@ public class Bullet3D : MonoBehaviour
 
     void FixedUpdate()
     {
-        /*
-        transform.Translate(CurrentSpeed * Vector3.forward * Time.deltaTime);
-        transform.Translate(CurrentGravityInfluence * Vector3.up*-1 * Time.deltaTime);
-        CurrentGravityInfluence += GravityAcceleration * Time.deltaTime;
-        CurrentSpeed -= AirStopEffectPerSec * Time.deltaTime;
-        */
         RayCastCheck();
+
         //forward
         transform.Translate(CurrentSpeed * Vector3.forward * Time.deltaTime);
 
@@ -48,14 +42,18 @@ public class Bullet3D : MonoBehaviour
 
         CurrentGravityInfluence += GravityAcceleration * Time.deltaTime;
         CurrentSpeed -= AirStopEffectPerSec * Time.deltaTime;
-        
+
+        PointOfDirection = transform.position + transform.forward * CurrentSpeed + Vector3.up * -CurrentGravityInfluence;
+
+        Body.LookAt(PointOfDirection);
     }
+
 
     void RayCastCheck()
     {
-        if (Physics.Linecast(transform.position + Vector3.forward * -1.5f, transform.position + Vector3.forward*1.5f, layerLevelMask)
-            || Physics.Linecast(transform.position + Vector3.up * 0.5f, transform.position + Vector3.up * -0.5f, layerLevelMask)
-            || Physics.Linecast(transform.position + Vector3.right * 0.5f, transform.position + Vector3.right * -0.5f, layerLevelMask))
+        if (Physics.Linecast(Body.transform.position + Body.transform.forward * -1.5f, Body.transform.position + Body.transform.forward *1.5f, layerLevelMask)
+            || Physics.Linecast(Body.transform.position + Body.transform.up * 0.2f, Body.transform.position + Body.transform.up * -0.2f, layerLevelMask)
+            || Physics.Linecast(Body.transform.position + Body.transform.right * 0.2f, Body.transform.position + Body.transform.right * -0.2f, layerLevelMask))
 
         {
             Instantiate(GroundHitPR, transform.position, Quaternion.identity);
@@ -65,8 +63,9 @@ public class Bullet3D : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawLine(transform.position + Vector3.forward * -1.5f, transform.position + Vector3.forward * 1.5f);
-        Gizmos.DrawLine(transform.position + Vector3.up * 0.5f, transform.position + Vector3.up * -0.5f);
+        Gizmos.DrawLine(Body.transform.position + Body.transform.forward * -1.5f, Body.transform.position + Body.transform.forward * 1.5f);
+        Gizmos.DrawLine(Body.transform.position + Body.transform.up * 0.2f, Body.transform.position + Body.transform.up * -0.2f);
+        Gizmos.DrawLine(Body.transform.position + Body.transform.right * 0.2f, Body.transform.position + Body.transform.right * -0.2f);
     }
 
 
